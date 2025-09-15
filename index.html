@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  
+  
+
+  <!-- Fonts + reset -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="/selina-logo.png" />
+
+  <!-- Bootstrap CSS (used for layout only; colors come from CSS variables) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+qdLaY6LQ6Q6gYwM3e9k2QZp6j6QZ9Yf3g1f5Qe5V9q3V9Q" crossorigin="anonymous">
+
+  <style>
+  :root{ --bg:#071124; --panel:#12141a; --accent:#66fcf1; --muted:#9aa4ad; }
+    html,body{ height:100%; margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial; background:var(--bg); color:#e6edf3; }
+    /* basic header/footer so file preview isn't empty */
+    .page { min-height:100vh; display:flex; flex-direction:column; }
+    header{ background:#14171b; padding:12px 20px; border-bottom:1px solid rgba(255,255,255,0.03); display:flex; align-items:center; gap:12px; }
+    header h1{ font-size:1rem; color:var(--accent); margin:0; }
+    main{ flex:1; display:flex; align-items:center; justify-content:center; padding:24px; }
+    footer{ padding:12px 20px; text-align:center; font-size:0.85rem; color:var(--muted); border-top:1px solid rgba(255,255,255,0.03); }
+
+    /* overlay shown when page is opened via file:// (helpful) */
+    #file-protocol-overlay {
+      position:fixed; inset:0; display:none; z-index:9999;
+      background:linear-gradient(180deg, rgba(2,6,23,0.9), rgba(2,6,23,0.95));
+      color:#fff; align-items:center; justify-content:center; padding:24px;
+    }
+    #file-protocol-overlay .box {
+      max-width:760px; width:100%; background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.04);
+      padding:20px; border-radius:12px; box-shadow:0 8px 40px rgba(0,0,0,0.6);
+    }
+    #file-protocol-overlay h2 { margin:0 0 8px 0; color:var(--accent); }
+    #file-protocol-overlay p { margin:0 0 12px 0; color:#cfeffc; line-height:1.45; }
+    #file-protocol-overlay .cmd { background:#071014; padding:12px; border-radius:6px; font-family:monospace; color:#9feaf5; display:inline-block; margin-bottom:12px; }
+    #file-protocol-overlay .btn { background:var(--accent); color:#071014; padding:8px 12px; border-radius:8px; font-weight:700; border:0; cursor:pointer; }
+    #file-protocol-overlay .link { color:#9feaf5; text-decoration:underline; cursor:pointer; }
+
+    /* small helper if assets missing */
+    .notice { color:var(--muted); font-size:0.95rem; text-align:center; max-width:900px; }
+  </style>
+</head>
+<body>
+  <div class="page">
+  <nav class="app-navbar" aria-label="Main navigation" id="static-app-navbar">
+      <div class="nav-left">
+        <img src="/selina-logo.png" alt="Selina" class="nav-logo" onerror="this.style.display='none'">
+        <div class="nav-title">SynthChain</div>
+      </div>
+
+      <div class="nav-center">
+        <a href="#" class="nav-link">Dashboard</a>
+        <a href="#" class="nav-link">Markets</a>
+        <a href="#" class="nav-link">Bots</a>
+        <a href="#" class="nav-link">Portfolio</a>
+      </div>
+
+      <div class="nav-right">
+        <button class="nav-btn" id="theme-toggle" title="Toggle theme">🌙</button>
+        <button class="nav-btn primary" id="connect-btn">Connect Wallet</button>
+      </div>
+    </nav>
+
+  <!-- React mounts here -->
+    <main>
+      <div id="root" style="width:100%;max-width:1200px;"></div>
+    </main>
+
+    <footer>
+      <div class="notice">
+        If this page is blank, make sure you started the Vite dev server and opened <strong>http://localhost:5173</strong> — do NOT open this file directly using file://
+      </div>
+    </footer>
+  </div>
+
+  <!-- Friendly overlay shown when user opens file:// directly -->
+  <div id="file-protocol-overlay" role="dialog" aria-modal="true">
+    <div class="box">
+      <h2>You're opening the page directly (file://)</h2>
+      <p>
+        React + Vite must be served over <strong>http://</strong>. Opening the HTML file directly in your browser causes the CORS / script blocking errors you saw:
+      </p>
+
+      <div class="cmd">Access to script at 'file:///C:/src/main.jsx' ... blocked by CORS</div>
+
+      <p>
+        Fix it by running the dev server and opening the app over HTTP. In your terminal run:
+      </p>
+
+      <div class="cmd">cd synthetic-trading-app/frontend<br>npm install<br>npm run dev</div>
+
+      <p>
+        After the server starts, open: <strong>http://localhost:5173</strong>
+      </p>
+
+      <div style="display:flex;gap:8px;">
+        <button class="btn" onclick="window.location.href='http://localhost:5173'">Open http://localhost:5173</button>
+        <button class="btn" style="background:#2b6f77" onclick="document.getElementById('file-protocol-overlay').style.display='none'">Continue anyway</button>
+      </div>
+
+      <p style="margin-top:12px;color:#cfeaf5">
+        If your dev server runs on a different port, open that URL instead. If the logo doesn't appear, put <code>selina-logo.png</code> inside <code>frontend/public/</code>.
+      </p>
+    </div>
+  </div>
+
+  <!-- Vite entrypoint (React) -->
+    <script type="module">
+    // if file protocol, show overlay and stop attempting to import scripts (prevents cryptic CORS errors)
+    // hide the static navbar when served via http so React can render the canonical TopNav
+    if (location.protocol !== 'file:') {
+      const nav = document.getElementById('static-app-navbar');
+      if (nav) nav.style.display = 'none';
+    }
+    if (location.protocol === 'file:') {
+      const overlay = document.getElementById('file-protocol-overlay');
+      if (overlay) overlay.style.display = 'flex';
+      // DO NOT import the module when using file:// — exit early
+    } else {
+      // correct usage: import the React entry (Vite will serve /src/main.jsx)
+      import('/src/main.jsx').catch(err => {
+        // friendly fallback if import fails (network/server issue)
+        console.error('Failed to import /src/main.jsx:', err);
+        const overlay = document.getElementById('file-protocol-overlay');
+        if (overlay) {
+          overlay.style.display = 'flex';
+          overlay.querySelector('h2').textContent = 'Dev server not reachable';
+          overlay.querySelector('.cmd').textContent = 'Failed to load /src/main.jsx — is the dev server running?';
+        }
+      });
+    }
+  </script>
+
+  <script>
+    // Small client-side helpers so index.html is useful even when React fails to load
+    document.getElementById('theme-toggle')?.addEventListener('click', () => {
+      const root = document.documentElement;
+      if (root.style.background || getComputedStyle(root).getPropertyValue('--bg')) {
+        if (root.classList.contains('theme-light')) {
+          root.classList.remove('theme-light');
+        } else {
+          root.classList.add('theme-light');
+        }
+      }
+    });
+
+    document.getElementById('connect-btn')?.addEventListener('click', () => {
+      alert('Demo: connecting wallet (React will manage real connection)');
+    });
+  </script>
+
+  <!-- Bootstrap bundle (Popper + JS) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoU6V5Y5nQ1q3YF7c6q0s8r9t3m6q7p" crossorigin="anonymous"></script>
+</body>
+</html>
